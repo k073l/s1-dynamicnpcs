@@ -18,24 +18,36 @@ public static class CustomNPCHelpers
         builder.WithSpawnPosition(spawn);
         if (cfg.Customer.IsCustomer)
         {
+            // debug
+            MelonLogger.Msg($"Configuring {cfg.Id} as customer");
+            var dump = JsonConvert.SerializeObject(cfg.Customer, Formatting.Indented);
+            MelonLogger.Msg(dump);
+            // end debug
             var cCfg = cfg.Customer;
-            builder.EnsureCustomer()
-                .WithCustomerDefaults(cd =>
-                {
-                    cd.WithSpending(cCfg.Spending.Item1, cCfg.Spending.Item2)
-                        .WithOrdersPerWeek(cCfg.OrdersPerWeek.Item1, cCfg.OrdersPerWeek.Item2)
-                        .WithPreferredOrderDay(cCfg.PreferredOrderDay)
-                        .WithOrderTime(cCfg.OrderTime)
-                        .WithStandards(cCfg.Standards)
-                        .AllowDirectApproach(cCfg.AllowDirectApproach)
-                        .GuaranteeFirstSample(cCfg.GuaranteeFirstSample)
-                        .WithMutualRelationRequirement(cCfg.MutualRelationRequirement.Item1,
-                            cCfg.MutualRelationRequirement.Item2)
-                        .WithCallPoliceChance(cCfg.CallPoliceChance)
-                        .WithDependence(cCfg.Dependence.Item1, cCfg.Dependence.Item2)
-                        .WithAffinities(cCfg.Affinities)
-                        .WithPreferredPropertiesByName(cCfg.PreferredProperties.ToArray());
-                });
+            try
+            {
+                builder.EnsureCustomer()
+                    .WithCustomerDefaults(cd =>
+                    {
+                        cd.WithSpending(cCfg.Spending.Item1, cCfg.Spending.Item2)
+                            .WithOrdersPerWeek(cCfg.OrdersPerWeek.Item1, cCfg.OrdersPerWeek.Item2)
+                            .WithPreferredOrderDay(cCfg.PreferredOrderDay)
+                            .WithOrderTime(cCfg.OrderTime)
+                            .WithStandards(cCfg.Standards)
+                            .AllowDirectApproach(cCfg.AllowDirectApproach)
+                            .GuaranteeFirstSample(cCfg.GuaranteeFirstSample)
+                            .WithMutualRelationRequirement(cCfg.MutualRelationRequirement.Item1,
+                                cCfg.MutualRelationRequirement.Item2)
+                            .WithCallPoliceChance(cCfg.CallPoliceChance)
+                            .WithDependence(cCfg.Dependence.Item1, cCfg.Dependence.Item2)
+                            .WithAffinities(cCfg.Affinities)
+                            .WithPreferredPropertiesByName(cCfg.PreferredProperties.ToArray());
+                    });
+            }
+            catch (Exception e)
+            {
+                MelonLogger.Error($"Error in customer config for {cfg.Id}: {e}");
+            }
         }
 
         builder.WithRelationshipDefaults(r =>
@@ -54,7 +66,12 @@ public static class CustomNPCHelpers
                 switch (sch.Type)
                 {
                     case "UseVendingMachine":
-                        plan.Add(new UseVendingMachineSpec { StartTime = sch.StartTime, MachineGUID = string.IsNullOrWhiteSpace(sch.MachineGUID) ? null : sch.MachineGUID, Name = sch.Name });
+                        plan.Add(new UseVendingMachineSpec
+                        {
+                            StartTime = sch.StartTime,
+                            MachineGUID = string.IsNullOrWhiteSpace(sch.MachineGUID) ? null : sch.MachineGUID,
+                            Name = sch.Name
+                        });
                         break;
                     case "WalkTo":
                         plan.Add(new WalkToSpec
@@ -114,10 +131,10 @@ public static class CustomNPCHelpers
     public static void ApplyOnCreated(S1API.Entities.NPC self, NPCConfig cfg)
     {
         MelonLogger.Msg("[DynamicNPC] OnCreated - applying config");
-        
+
         self.Aggressiveness = cfg.Aggressiveness;
         self.Region = cfg.Region;
-        
+
         if (cfg.Appearance != null)
         {
             try
@@ -129,9 +146,9 @@ public static class CustomNPCHelpers
                 MelonLogger.Error($"[DynamicNPC] Failed to apply appearance config: {ex}");
             }
         }
-        
+
         self.Appearance.Build();
-        
+
         self.Schedule?.Enable();
         self.Schedule?.InitializeActions();
     }
@@ -143,11 +160,11 @@ public static class CustomNPCHelpers
         ApplyLayerDictionary(appearance, cfg.FaceLayers, "FaceLayerFields");
         ApplyLayerDictionary(appearance, cfg.AccessoryLayers, "AccessoryLayerFields");
     }
-    
+
     private static void ApplyFields(NPCAppearance appearance, Dictionary<string, object> fields)
     {
         var s1Assembly = typeof(NPCAppearance).Assembly;
-        
+
         foreach (var kv in fields)
         {
             var fieldType = s1Assembly.GetType($"S1API.Entities.Appearances.CustomizationFields.{kv.Key}");
@@ -157,7 +174,7 @@ public static class CustomNPCHelpers
                     .Where(t => t.Namespace == "S1API.Entities.Appearances.CustomizationFields")
                     .Select(t => t.Name)
                     .ToArray();
-                    
+
                 MelonLogger.Warning($"[DynamicNPC] Unknown appearance field: {kv.Key}");
                 MelonLogger.Warning($"[DynamicNPC] Available CustomizationFields: {string.Join(", ", availableTypes)}");
                 continue;
@@ -216,7 +233,8 @@ public static class CustomNPCHelpers
                         else
                         {
                             valueToSet = Color.white;
-                            MelonLogger.Warning($"[DynamicNPC] Expected color string for {kv.Key}, using white fallback.");
+                            MelonLogger.Warning(
+                                $"[DynamicNPC] Expected color string for {kv.Key}, using white fallback.");
                         }
                     }
                     else if (fieldType == typeof(string))
@@ -240,7 +258,7 @@ public static class CustomNPCHelpers
         string layerNamespace)
     {
         var s1Assembly = typeof(NPCAppearance).Assembly;
-        
+
         foreach (var kv in layers)
         {
             string path;
@@ -267,10 +285,11 @@ public static class CustomNPCHelpers
                         color = Color.white;
                         break;
                     default:
-                        MelonLogger.Warning($"[DynamicNPC] Unknown layer value type for {kv.Key}: {kv.Value?.GetType().Name}, skipping.");
+                        MelonLogger.Warning(
+                            $"[DynamicNPC] Unknown layer value type for {kv.Key}: {kv.Value?.GetType().Name}, skipping.");
                         continue;
                 }
-                
+
                 var layerType = s1Assembly.GetType($"S1API.Entities.Appearances.{layerNamespace}.{kv.Key}");
                 if (layerType == null)
                 {
@@ -278,9 +297,10 @@ public static class CustomNPCHelpers
                         .Where(t => t.Namespace == $"S1API.Entities.Appearances.{layerNamespace}")
                         .Select(t => t.Name)
                         .ToArray();
-                        
+
                     MelonLogger.Warning($"[DynamicNPC] Layer type not found: {layerNamespace}.{kv.Key}");
-                    MelonLogger.Warning($"[DynamicNPC] Available {layerNamespace} types: {string.Join(", ", availableTypes)}");
+                    MelonLogger.Warning(
+                        $"[DynamicNPC] Available {layerNamespace} types: {string.Join(", ", availableTypes)}");
                     continue;
                 }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using DynamicNPCs.Configuration;
 using DynamicNPCs.Generation;
+using DynamicNPCs.Helpers;
 using MelonLoader;
 using MelonLoader.Utils;
 using Newtonsoft.Json;
@@ -50,9 +51,18 @@ public class DynamicNPCS : MelonMod
             return;
         }
 
-        var serializer = new JsonSerializer();
-        var reader = new JsonTextReader(new StringReader(json));
-        var configs = serializer.Deserialize<List<NPCConfig>>(reader);
+        
+        var settings = new JsonSerializerSettings
+        {
+            Converters =
+            {
+                new TupleConverter<float, float>(),
+                new TupleConverter<int, int>(),
+                new TupleConverter<string, float>()
+            }
+        };
+
+        var configs = JsonConvert.DeserializeObject<List<NPCConfig>>(json, settings);
 
         foreach (var cfg in configs)
         {

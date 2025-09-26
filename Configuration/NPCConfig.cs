@@ -41,7 +41,7 @@ public class RelationshipConfig
 
 public class CustomerConfig
 {
-    public bool IsCustomer { get; set; } = true;
+    public bool IsCustomer { get; set; } = false;
     public (float, float) Spending { get; set; } = (200f, 800f);
     public (int, int) OrdersPerWeek { get; set; } = (2, 5);
     public string PreferredOrderDay { get; set; } = "Monday";
