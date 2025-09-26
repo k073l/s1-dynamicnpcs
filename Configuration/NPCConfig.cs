@@ -36,7 +36,7 @@ public class RelationshipConfig
     public float Delta { get; set; } = 1.5f;
     public bool IsUnlocked { get; set; } = false;
     public string UnlockType { get; set; } = "DirectApproach";
-    public List<string> Connections { get; set; } = new() { "kyle_cooley" };
+    public List<string> Connections { get; set; } = new();
 }
 
 public class CustomerConfig
@@ -52,8 +52,8 @@ public class CustomerConfig
     public (float, float) MutualRelationRequirement { get; set; } = (2.5f, 4.0f);
     public float CallPoliceChance { get; set; } = 0.1f;
     public (float, float) Dependence { get; set; } = (0.2f, 1.8f);
-    public List<(string, float)> Affinities { get; set; } = new() { ("Weed", 0.3f) };
-    public List<string> PreferredProperties { get; set; } = new() { "Athletic", "Sneaky" };
+    public List<(string, float)> Affinities { get; set; } = new();
+    public List<string> PreferredProperties { get; set; } = new();
 }
 
 public class ScheduleConfig
