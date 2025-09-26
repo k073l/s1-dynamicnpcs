@@ -1,0 +1,13 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicNPCs", "DynamicNPCs.csproj", "{2977198F-5A38-4E1D-AD03-55FD0EF4A19C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Release Mono|Any CPU = Release Mono|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2977198F-5A38-4E1D-AD03-55FD0EF4A19C}.Release Mono|Any CPU.ActiveCfg = Release Mono|Any CPU
+		{2977198F-5A38-4E1D-AD03-55FD0EF4A19C}.Release Mono|Any CPU.Build.0 = Release Mono|Any CPU
+	EndGlobalSection
+EndGlobal
