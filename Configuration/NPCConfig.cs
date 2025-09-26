@@ -16,8 +16,9 @@ public class NPCConfig
     public float[] Spawn { get; set; } = new float[3];
     public float Aggressiveness { get; set; } = 0f;
     public Region Region { get; set; } = Region.Northtown;
-    
-    public CustomerConfig CustomerConfig { get; set; } = new();
+
+    public RelationshipConfig Relationship { get; set; } = new();
+    public CustomerConfig Customer { get; set; } = new();
     public AppearanceConfig Appearance { get; set; } = new();
     public List<ScheduleConfig> Schedules { get; set; } = new();
 }
@@ -28,6 +29,14 @@ public class AppearanceConfig
     public Dictionary<string, object> BodyLayers { get; set; } = new();
     public Dictionary<string, object> FaceLayers { get; set; } = new();
     public Dictionary<string, object> AccessoryLayers { get; set; } = new();
+}
+
+public class RelationshipConfig
+{
+    public float Delta { get; set; } = 1.5f;
+    public bool IsUnlocked { get; set; } = false;
+    public string UnlockType { get; set; } = "DirectApproach";
+    public List<string> Connections { get; set; } = new() { "kyle_cooley" };
 }
 
 public class CustomerConfig
@@ -49,11 +58,34 @@ public class CustomerConfig
 
 public class ScheduleConfig
 {
-    public string Type { get; set; } = ""; // "UseVendingMachine" | "WalkTo" | "StayInBuilding"
+    public string Type { get; set; } = ""; // "UseVendingMachine" | "WalkTo" | "StayInBuilding" | "LocationDialogue" | "DriveToCarPark" | "EnsureDealSignal"
+    public string Name { get; set; } // Optional name for the schedule entry
     public int StartTime { get; set; }
+    
+    // WalkTo & LocationDialogue
     public float X { get; set; }
     public float Y { get; set; }
     public float Z { get; set; }
-    public string? BuildingName { get; set; }
+    public bool FaceDesinationDirection { get; set; }
+    public float Within { get; set; }
+    public bool WarpIfSkipped { get; set; }
+    
+    // UseVendingMachine
+    public string MachineGUID { get; set; }
+    
+    // StayInBuilding
+    public string BuildingName { get; set; }
     public int DurationMinutes { get; set; }
+    public int DoorIndex { get; set; }
+    
+    // LocationDialogue
+    public int GreetingOverrideToEnable { get; set; }
+    public int ChoiceToEnable { get; set; }
+    
+    // DriveToCarPark
+    public string ParkingLotGUID { get; set; }
+    public string VehicleGUID { get; set; }
+    public bool? OverrideParkingType { get; set; }
+    public int? ParkingType { get; set; }
+    public string Alignment { get; set; }
 }

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using S1API.Entities;
 using S1API.Entities.Schedule;
+using S1API.Vehicles;
 using UnityEngine;
 
 namespace DynamicNPCs.Helpers;
@@ -15,9 +16,9 @@ public static class CustomNPCHelpers
     {
         var spawn = new Vector3(cfg.Spawn[0], cfg.Spawn[1], cfg.Spawn[2]);
         builder.WithSpawnPosition(spawn);
-        if (cfg.CustomerConfig.IsCustomer)
+        if (cfg.Customer.IsCustomer)
         {
-            var cCfg = cfg.CustomerConfig;
+            var cCfg = cfg.Customer;
             builder.EnsureCustomer()
                 .WithCustomerDefaults(cd =>
                 {
@@ -37,6 +38,15 @@ public static class CustomNPCHelpers
                 });
         }
 
+        builder.WithRelationshipDefaults(r =>
+        {
+            var rCfg = cfg.Relationship;
+            r.WithDelta(rCfg.Delta)
+                .SetUnlocked(rCfg.IsUnlocked)
+                .SetUnlockType(rCfg.UnlockType)
+                .WithConnectionsById(rCfg.Connections.ToArray());
+        });
+
         builder.WithSchedule(plan =>
         {
             foreach (var sch in cfg.Schedules)
@@ -44,23 +54,56 @@ public static class CustomNPCHelpers
                 switch (sch.Type)
                 {
                     case "UseVendingMachine":
-                        plan.Add(new UseVendingMachineSpec { StartTime = sch.StartTime });
+                        plan.Add(new UseVendingMachineSpec { StartTime = sch.StartTime, MachineGUID = string.IsNullOrWhiteSpace(sch.MachineGUID) ? null : sch.MachineGUID, Name = sch.Name });
                         break;
                     case "WalkTo":
                         plan.Add(new WalkToSpec
                         {
                             Destination = new Vector3(sch.X, sch.Y, sch.Z),
                             StartTime = sch.StartTime,
-                            FaceDestinationDirection = true
+                            FaceDestinationDirection = sch.FaceDesinationDirection,
+                            Within = sch.Within,
+                            WarpIfSkipped = sch.WarpIfSkipped,
+                            Name = sch.Name
                         });
                         break;
                     case "StayInBuilding":
                         plan.Add(new StayInBuildingSpec
                         {
-                            BuildingName = sch.BuildingName ?? "Unknown",
+                            BuildingName = sch.BuildingName,
                             StartTime = sch.StartTime,
-                            DurationMinutes = sch.DurationMinutes
+                            DurationMinutes = sch.DurationMinutes,
+                            DoorIndex = sch.DoorIndex,
+                            Name = sch.Name
                         });
+                        break;
+                    case "LocationDialogue":
+                        plan.Add(new LocationDialogueSpec
+                        {
+                            Destination = new Vector3(sch.X, sch.Y, sch.Z),
+                            StartTime = sch.StartTime,
+                            FaceDestinationDirection = sch.FaceDesinationDirection,
+                            Within = sch.Within,
+                            WarpIfSkipped = sch.WarpIfSkipped,
+                            GreetingOverrideToEnable = sch.GreetingOverrideToEnable,
+                            ChoiceToEnable = sch.ChoiceToEnable,
+                            Name = sch.Name
+                        });
+                        break;
+                    case "DriveToCarPark":
+                        plan.Add(new DriveToCarParkSpec
+                        {
+                            ParkingLotGUID = sch.ParkingLotGUID,
+                            VehicleGUID = sch.VehicleGUID,
+                            OverrideParkingType = sch.OverrideParkingType,
+                            ParkingType = sch.ParkingType,
+                            Alignment = Enum.Parse<ParkingAlignment>(sch.Alignment),
+                            StartTime = sch.StartTime,
+                            Name = sch.Name
+                        });
+                        break;
+                    case "EnsureDealSignal":
+                        plan.EnsureDealSignal();
                         break;
                 }
             }
