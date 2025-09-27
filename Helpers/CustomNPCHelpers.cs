@@ -18,11 +18,6 @@ public static class CustomNPCHelpers
         builder.WithSpawnPosition(spawn);
         if (cfg.Customer.IsCustomer)
         {
-            // debug
-            MelonLogger.Msg($"Configuring {cfg.Id} as customer");
-            var dump = JsonConvert.SerializeObject(cfg.Customer, Formatting.Indented);
-            MelonLogger.Msg(dump);
-            // end debug
             var cCfg = cfg.Customer;
             try
             {

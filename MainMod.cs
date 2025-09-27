@@ -19,18 +19,19 @@ public static class BuildInfo
 {
     public const string Name = "DynamicNPCS";
     public const string Description = "Dynamic NPC generation from JSON configuration";
-    public const string Author = "me";
+    public const string Author = "k073l";
     public const string Version = "1.0.0";
 }
 
 public class DynamicNPCS : MelonMod
 {
     private static MelonLogger.Instance Logger;
+    private const string DirectoryName = "DynamicNPCS";
 
     public override void OnInitializeMelon()
     {
         Logger = LoggerInstance;
-        Logger.Msg("DynamicNPCS initialized");
+        Logger.Msg("DynamicNPCs initialized");
 
         try
         {
@@ -44,13 +45,14 @@ public class DynamicNPCS : MelonMod
 
     private void LoadNPCConfigurations()
     {
-        string json = File.ReadAllText(Path.Combine(MelonEnvironment.UserDataDirectory, "npcs.json"));
-        if (string.IsNullOrWhiteSpace(json))
+        var path = Path.Combine(MelonEnvironment.UserDataDirectory, DirectoryName);
+        if (!Directory.Exists(path))
         {
-            Logger.Error("NPC configuration JSON is empty");
+            Directory.CreateDirectory(path);
+            Logger.Msg($"Created directory for NPC configurations at {path}. Please add JSON files and restart the game.");
             return;
         }
-
+        var jsons = Directory.GetFiles(path, "*.json", SearchOption.AllDirectories);
         
         var settings = new JsonSerializerSettings
         {
@@ -61,13 +63,20 @@ public class DynamicNPCS : MelonMod
                 new TupleConverter<string, float>()
             }
         };
-
-        var configs = JsonConvert.DeserializeObject<List<NPCConfig>>(json, settings);
-
-        foreach (var cfg in configs)
+        foreach (var json in jsons)
         {
-            var npcType = NPCGenerator.CreateNPCSubclass(cfg);
-            Logger.Msg($"Created NPC: {cfg.ClassName}");
+            try
+            {
+                var jsonContent = File.ReadAllText(json);
+                var cfg = JsonConvert.DeserializeObject<NPCConfig>(jsonContent, settings);
+                if (cfg == null) throw new Exception($"Failed to load NPC config from {json}");
+                var npcType = NPCGenerator.CreateNPCSubclass(cfg);
+                Logger.Msg($"Created NPC: {cfg.ClassName}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Msg($"Failed loading JSON file {json}: {ex.Message}");
+            }
         }
     }
 }

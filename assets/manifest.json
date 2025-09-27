@@ -1,10 +1,10 @@
 {
-    "name": "S1APINPCTesting",
+    "name": "DynamicNPCs",
     "version_number": "1.0.0",
     "website_url": "",
-    "description": "does stuff i guess",
+    "description": "Dynamic NPC generation from JSON configuration",
     "dependencies": [
         "LavaGang-MelonLoader-0.7.0",
-        "the_croods-SwapperPlugin-1.2.1"
+        "ifBars-S1API_Forked-2.1.0"
     ]
 }
